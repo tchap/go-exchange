@@ -51,6 +51,10 @@ ex.Terminate()
 //   body:  b839dc656e3e78647c09453b33652b389e37c07a
 ```
 
+## Ideas
+
+* Limit how many handlers can be running at the same time.
+
 ## Related Projects ##
 
 * [go-patricia](https://github.com/tchap/go-patricia) - trie that is being used

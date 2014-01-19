@@ -12,6 +12,8 @@ import (
 	"testing"
 )
 
+// Tests -----------------------------------------------------------------------
+
 func TestExchange_PublishSubcribe(t *testing.T) {
 	var (
 		eventsSent     int32 = 100
@@ -64,6 +66,8 @@ func TestExchange_PublishSubcribe(t *testing.T) {
 	}
 }
 
+// Examples --------------------------------------------------------------------
+
 func ExampleExchange_PublishSubscribe() {
 	exchange := New()
 
@@ -78,4 +82,25 @@ func ExampleExchange_PublishSubscribe() {
 	// Event received:
 	//   topic: "git.push"
 	//   body:  b839dc656e3e78647c09453b33652b389e37c07a
+}
+
+
+// Benchmarks ------------------------------------------------------------------
+
+// This works as a fork bomb right now.
+func BenchmarkExchange_PublishSubscribe(b *testing.B) {
+	exchange := New()
+
+	exchange.Subscribe(Topic("git"), func(topic Topic, event Event) {
+		return
+	})
+
+	t := Topic("git.push")
+	e := "b839dc656e3e78647c09453b33652b389e37c07a"
+
+	for i := 0; i < b.N; i++ {
+		exchange.Publish(t, e)
+	}
+
+	exchange.Terminate()
 }
