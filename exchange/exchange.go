@@ -39,6 +39,8 @@ const (
 // For now Exchange supports the publish-subscribe messaging pattern. It is based
 // on topics and callbacks can be registered for topic prefixes, not only events
 // that match exactly the chosen topic string.
+//
+// Exchange is thread-safe.
 type Exchange struct {
 	state              int
 	trie               *patricia.Trie
