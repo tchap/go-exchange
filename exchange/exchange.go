@@ -3,6 +3,10 @@
 // Use of this source code is governed by The MIT License
 // that can be found in the LICENSE file.
 
+// go-exchange is an in-process message (or event) exchange, for now featuring
+// the publish-subscribe messaging pattern. The interestng part is, however,
+// that callbacks are not registered for exactly matching event topic, but
+// rather event topic prefixes.
 package exchange
 
 import (
@@ -30,6 +34,11 @@ const (
 	stateTerminated
 )
 
+// Exchange is the struct this package is named after, or the other way around.
+//
+// For now Exchange supports the publish-subscribe messaging pattern. It is based
+// on topics and callbacks can be registered for topic prefixes, not only events
+// that match exactly the chosen topic string.
 type Exchange struct {
 	state              int
 	trie               *patricia.Trie
@@ -40,6 +49,7 @@ type Exchange struct {
 	cond               *sync.Cond
 }
 
+// Constructor function for Exchange, nothing special here.
 func New() *Exchange {
 	mu := new(sync.RWMutex)
 	return &Exchange{
@@ -57,6 +67,10 @@ type handlerRecord struct {
 
 // Public API ------------------------------------------------------------------
 
+// Subscribe registers handler to be invoked on any event that matches prefix topicPrefix.
+//
+// The handlers registered with Subscribe are invoked asynchronously using go when an event
+// matching the relevant prefix is received.
 func (exchange *Exchange) Subscribe(topicPrefix Topic, handler EventHandler) (Handle, error) {
 	exchange.cond.L.Lock()
 	defer exchange.cond.L.Unlock()
@@ -86,6 +100,7 @@ func (exchange *Exchange) Subscribe(topicPrefix Topic, handler EventHandler) (Ha
 	return record.handle, nil
 }
 
+// Unsubscribe cancels the event handler represented by handle.
 func (exchange *Exchange) Unsubscribe(handle Handle) error {
 	exchange.cond.L.Lock()
 	defer exchange.cond.L.Unlock()
@@ -123,6 +138,10 @@ func (exchange *Exchange) Unsubscribe(handle Handle) error {
 	return ErrInvalidHandle
 }
 
+// Publish can be used for inserting the events into the exchange.
+//
+// This methods triggers all the relevant handlers and runs them in separate
+// goroutines.
 func (exchange *Exchange) Publish(topic Topic, event Event) error {
 	exchange.mu.RLock()
 
@@ -143,6 +162,7 @@ func (exchange *Exchange) Publish(topic Topic, event Event) error {
 	return nil
 }
 
+// Wait blocks until Terminate is called and all running goroutines return.
 func (exchange *Exchange) Wait() error {
 	exchange.cond.L.Lock()
 
@@ -159,6 +179,8 @@ func (exchange *Exchange) Wait() error {
 	return nil
 }
 
+// Terminate manes it impossible to insert any additional events into Exchange.
+// Then it waits for all running handlers to return. Then it returns as well.
 func (exchange *Exchange) Terminate() error {
 	exchange.cond.L.Lock()
 
