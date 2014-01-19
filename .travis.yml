@@ -4,9 +4,6 @@ go:
   - 1.2
   - tip
 
-script:
-  - go test -cover ./...
-
 branches:
   only:
     - master
