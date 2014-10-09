@@ -59,6 +59,7 @@ func New() *Exchange {
 		topicForHandle: make(map[Handle]Topic),
 		mu:             mu,
 		cond:           sync.NewCond(mu),
+		nextHandle:     1,
 	}
 }
 
