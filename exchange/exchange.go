@@ -28,6 +28,16 @@ type (
 	Topic        []byte
 )
 
+// add the default an global exchange
+var (
+	inProcessExchange = New()
+	Publish           = inProcessExchange.Publish
+	Subscribe         = inProcessExchange.Subscribe
+	Terminate         = inProcessExchange.Terminate
+	Unsubscribe       = inProcessExchange.Unsubscribe
+	Wait              = inProcessExchange.Wait
+)
+
 const (
 	stateRunning = iota
 	stateTerminating
