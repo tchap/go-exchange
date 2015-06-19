@@ -28,7 +28,7 @@ type (
 	Topic        []byte
 )
 
-// add the default an global exchange
+// add the default global exchange
 var (
 	inProcessExchange = New()
 	Publish           = inProcessExchange.Publish
@@ -157,6 +157,7 @@ func (exchange *Exchange) Unsubscribe(handle Handle) error {
 // goroutines.
 func (exchange *Exchange) Publish(topic Topic, event Event) error {
 	exchange.mu.RLock()
+	defer exchange.mu.RUnlock()
 
 	if exchange.state != stateRunning {
 		return ErrInvalidState
@@ -171,13 +172,13 @@ func (exchange *Exchange) Publish(topic Topic, event Event) error {
 			return nil
 		})
 
-	exchange.mu.RUnlock()
 	return nil
 }
 
 // Wait blocks until Terminate is called and all running goroutines return.
 func (exchange *Exchange) Wait() error {
 	exchange.cond.L.Lock()
+	defer exchange.cond.L.Unlock()
 
 	if exchange.state != stateRunning && exchange.state != stateTerminating {
 		exchange.cond.L.Unlock()
@@ -188,7 +189,6 @@ func (exchange *Exchange) Wait() error {
 		exchange.cond.Wait()
 	}
 
-	exchange.cond.L.Unlock()
 	return nil
 }
 
@@ -196,6 +196,7 @@ func (exchange *Exchange) Wait() error {
 // Then it waits for all running handlers to return. Then it returns as well.
 func (exchange *Exchange) Terminate() error {
 	exchange.cond.L.Lock()
+	defer exchange.cond.L.Unlock()
 
 	if exchange.state != stateRunning {
 		exchange.cond.L.Unlock()
@@ -207,7 +208,7 @@ func (exchange *Exchange) Terminate() error {
 	}
 
 	exchange.state = stateTerminated
-	exchange.cond.L.Unlock()
+
 	return nil
 }
 
