@@ -19,7 +19,7 @@ Any ideas on how to make the API or anything else better are welcome.
 ## Usage ##
 
 ```go
-import "github.com/tchap/go-exchange/exchange"
+import "github.com/toontong/go-exchange/exchange"
 ```
 
 ### Patterns ###
@@ -49,6 +49,13 @@ ex.Terminate()
 // Event received:
 //   topic: "git.push"
 //   body:  b839dc656e3e78647c09453b33652b389e37c07a
+
+
+// Or Used the global exchanage
+// did not need to New One instance.
+// eg:
+exchanage.Subscribe(...)
+exchanage.Publish(...)
 ```
 
 ## Ideas
@@ -57,7 +64,8 @@ ex.Terminate()
 
 ## Related Projects ##
 
-* [go-patricia](https://github.com/tchap/go-patricia) - trie that is being used
+* [go-patricia](https://github.com/tchap/go-patricia) - trie th
+* at is being used
   in this project for managing subscriptions
 
 ## License ##
